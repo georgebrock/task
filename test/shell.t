@@ -28,7 +28,7 @@
 
 use strict;
 use warnings;
-use Test::More tests => 5;
+use Test::More tests => 6;
 
 # Ensure environment has no influence.
 delete $ENV{'TASKDATA'};
@@ -53,6 +53,11 @@ like ($output, qr/testprompt>/, 'custom prompt is being used');
 qx{echo "rc:shell.rc add foo" | ../src/shell/tasksh 2>&1};
 $output = qx{echo "rc:shell.rc 1 info" | ../src/shell/tasksh 2>&1};
 like ($output, qr/Description\s+foo/, 'add/info working');
+
+# Test tab completion of project names
+qx{echo "rc:shell.rc add project:test foo\nrc:shell.rc add project:te\t bar" | ../src/shell/tasksh 2>&1};
+$output = qx{echo "rc:shell.rc project:test ls" | ../src/shell/tasksh 2>&1};
+like ($output, qr/bar/, 'tab complete project name');
 
 unlink 'shell.rc';
 ok (!-r 'shell.rc', 'Removed shell.rc');
